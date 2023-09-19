@@ -1,0 +1,11 @@
+[Unit] 
+Description=ThinkLed - light up Think Pad led 
+
+[Service] 
+Type=oneshot 
+ExecStart=/usr/local/bin/thinkled
+ExecStop=/bin/sh -c "killall tihnkled" 
+RemainAfterExit=yes 
+
+[Install] 
+WantedBy=multi-user.target
