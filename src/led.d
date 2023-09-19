@@ -1,13 +1,96 @@
+import std.array;
 import std.algorithm;
 import std.conv;
+import std.file;
+import std.format;
+import std.path;
 import std.stdio;
+import std.string;
 
-class Led 
+
+int ledMaxBrightness(in DirEntry entry)
 {
-  this(int maxBrightness)
+  auto maxBrightnessFile = buildPath(entry, "max_brightness");
+
+  string content = std.file.readText(maxBrightnessFile);
+  content = content.strip();
+
+  return content.to!int;
+}
+
+class LedRegistry
+{
+  this()
   {
-    ledFile = File(ledFileName, "w));");
+    this.leds = LedRegistry.getAvailableLeds();
+  }
+
+  void list() 
+  {
+    writeln("Available leds :");
+    writeln("----------------");
+    writeln(this.leds.map!(led => led.toPrettyString()).join("\n"));
+  }
+
+  private:
+    static Led[] getAvailableLeds()
+    {
+      Led[] leds;
+
+      foreach(DirEntry entry; dirEntries(LEDS_BASE_DIRECTORY, SpanMode.shallow)
+          .filter!(e => e.isDir))
+      {
+        string ledName = baseName(entry.name);
+        if(ledName.canFind("::"))
+          ledName = ledName.split("::")[$-1];
+
+        leds ~= Led(ledName, entry, ledMaxBrightness(entry));
+      }
+
+      return leds;
+    }
+
+
+    Led[] leds;
+
+    // https://docs.kernel.org/leds/leds-class.html
+    enum LEDS_BASE_DIRECTORY = "/sys/class/leds/";
+}
+
+struct Led
+{
+  const string name;
+  const DirEntry directory;
+  LedState state;
+  int maxBrightness;
+
+  this(in string name, in DirEntry directory, int maxBrightness)
+  {
+    this.name = name;
     this.maxBrightness = maxBrightness;
+    this.state = LedState(buildPath(directory, "brightness"), maxBrightness);
+  }
+
+  string toPrettyString()
+  {
+    return format("%s (brightness %d/%d)", 
+                  this.name, this.state.currentBrightness(), this.maxBrightness);
+  }
+}
+
+struct LedState
+{
+  this(in string ledFileName, int maxBrightness)
+  {
+    ledFile = File(ledFileName, "rw");
+    this.maxBrightness = maxBrightness;
+  }
+
+  int currentBrightness()
+  {
+    ledFile.readf!"%d\n"(brightness);
+    ledFile.seek(0);
+    return brightness;
   }
 
   void toggle()
@@ -42,5 +125,5 @@ class Led
     uint brightness;
     const int maxBrightness;
     File ledFile;
-    enum ledFileName = "/sys/class/leds/tpacpi::lid_logo_dot/brightness";
+    const string ledFileName;
 }
