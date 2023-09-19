@@ -1,12 +1,14 @@
 import std.array;
 import std.algorithm;
 import std.conv;
+import std.exception;
 import std.file;
 import std.format;
 import std.path;
 import std.stdio;
 import std.string;
 
+import core.stdc.stdlib: exit;
 
 int ledMaxBrightness(in DirEntry entry)
 {
@@ -94,7 +96,17 @@ struct LedState
 {
   this(in string ledFileName, int maxBrightness)
   {
-    ledFile = File(ledFileName, "w+");
+    try
+    {
+      ledFile = File(ledFileName, "w+");
+    }
+    catch(ErrnoException e)
+    {
+      stderr.writeln(e.msg);
+      stderr.writeln("Hint: run this binary as sudo");
+
+      exit(1);
+    }
     this.maxBrightness = maxBrightness;
   }
 
