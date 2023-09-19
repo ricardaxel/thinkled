@@ -1,3 +1,4 @@
+import std.algorithm;
 import std.conv;
 import std.stdio;
 
@@ -11,7 +12,12 @@ class Led
 
   void toggle()
   {
-    brightness = (brightness + 1) % (maxBrightness + 1);
+    brightness = brightness > 0 ? 0 : maxBrightness;
+  }
+
+  void incrementBrightness()
+  {
+    brightness = min(brightness + 1, maxBrightness);
   }
 
   void switchOn()
@@ -26,7 +32,6 @@ class Led
 
   void update()
   {
-    writefln("writing .. %b", brightness);
     ledFile.writef("%d", brightness);
     ledFile.flush();
     ledFile.seek(0);
@@ -37,6 +42,5 @@ class Led
     uint brightness;
     const int maxBrightness;
     File ledFile;
-    /* enum ledFileName = "/sys/class/leds/tpacpi::kbd_backlight/brightness"; */
-    enum ledFileName = "/sys/class/leds/tpacpi::power/brightness";
+    enum ledFileName = "/sys/class/leds/tpacpi::lid_logo_dot/brightness";
 }

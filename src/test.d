@@ -1,5 +1,6 @@
 import led;
 import input;
+import input_event_d;
 
 import core.thread;
 
@@ -49,41 +50,22 @@ int main()
   File kdbEventFile = File(kbdEventFilename, "r");
 
   auto led = new Led(255);  
+  
    
-/*   /1* foreach(ubyte[] buffer; kdbEventFile.byChunk(input_event.sizeof / ubyte.sizeof)) *1/ */
-/*   foreach(ubyte[] buffer; kdbEventFile.byChunk(24)) */
-/*   { */
-/*     writeln(buffer); */
-/*     event = cast(input_event*) buffer; */
-/*     if(event.type == EV_KEY) */
-/*       writefln("%d", event.value); */
-/*   } */
-
-
-  while(1)
+  foreach(ubyte[input_event.sizeof] buffer; kdbEventFile.byChunk(input_event.sizeof))
   {
-    led.toggle();
+    InputEvent event = InputEvent.fromRawBytes(buffer);
+    if(event.isKeyEvent())
+    {
+      if(event.isKeyRelease())
+        led.switchOff();
+      else if(event.isKeyPress())
+        led.switchOn();
+
+    }
     led.update();
-    Thread.sleep( dur!("msecs")( 50 ) ); // sleep for 5 seconds
   }
-  
-  /* input_event* event; */
-  
-
-  /* while(1) */
-  /* { */
-  /*   event = cast(input_event*) read(kbdEventFilename, input_event.sizeof); */
-  /*   read(kbdEventFilename, input_event.sizeof * 3); */
-
-  /*   // TODO shall be EV_KEY */
-  /*   if(event.type == EV_MSC) */
-  /*   { */
-  /*     led.toggle(); */
-  /*     led.update(); */
-  /*   } */
-  /* } */
-
-
 
   return 0;
 }
+
