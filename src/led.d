@@ -32,6 +32,18 @@ class LedRegistry
     writeln(this.leds.map!(led => led.toPrettyString()).join("\n"));
   }
 
+  Led getLedByName(string name)
+  {
+    foreach(led; this.leds)
+    {
+      if(led.name == name)
+        return led;
+    }
+
+    const errorMsg = format("Couldn't find led '%s'", name);
+    throw new Exception(errorMsg);
+  }
+
   private:
     static Led[] getAvailableLeds()
     {
@@ -82,13 +94,14 @@ struct LedState
 {
   this(in string ledFileName, int maxBrightness)
   {
-    ledFile = File(ledFileName, "rw");
+    ledFile = File(ledFileName, "w+");
     this.maxBrightness = maxBrightness;
   }
 
   int currentBrightness()
   {
     ledFile.readf!"%d\n"(brightness);
+    ledFile.flush();
     ledFile.seek(0);
     return brightness;
   }

@@ -1,8 +1,7 @@
-import led;
+import cli;
 import input;
 import input_event_d;
-
-import core.thread;
+import led;
 
 import std.array;
 import std.algorithm;
@@ -44,12 +43,22 @@ string getKeyboardEventFileName()
   return "/dev/input/" ~ event;
 }
 
-int main()
+int main(string[] argv)
 {
+  auto ledRegistry = new LedRegistry();
+
+  auto args = parseArgv(argv);
+
+  if(args.listLeds)
+  {
+    ledRegistry.list();
+    return 0;
+  }
+
   const string kbdEventFilename = getKeyboardEventFileName(); 
   File kdbEventFile = File(kbdEventFilename, "r");
 
-  auto led = new Led(255);  
+  auto led = ledRegistry.getLedByName(args.led);
   
    
   foreach(ubyte[input_event.sizeof] buffer; kdbEventFile.byChunk(input_event.sizeof))
@@ -58,12 +67,12 @@ int main()
     if(event.isKeyEvent())
     {
       if(event.isKeyRelease())
-        led.switchOff();
+        led.state.switchOff();
       else if(event.isKeyPress())
-        led.switchOn();
+        led.state.switchOn();
 
     }
-    led.update();
+    led.state.update();
   }
 
   return 0;
