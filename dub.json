@@ -1,0 +1,11 @@
+{
+	"authors": [
+		"A. Ricard"
+	],
+	"copyright": "Copyright © 2023, A. Ricard",
+	"description": "Handy tool to control LED of your computer",
+	"license": "Boost",
+	"name": "thinkled",
+
+  "targetPath" : "bin/"
+}
