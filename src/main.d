@@ -8,36 +8,34 @@ import std.stdio;
 
 int main(string[] argv)
 {
-  auto ledRegistry = new LedRegistry();
+    auto ledRegistry = new LedRegistry();
 
-  auto args = parseArgv(argv);
+    auto args = parseArgv(argv);
 
-  if(args.listLeds)
-  {
-    ledRegistry.list();
-    return 0;
-  }
-
-  const string kbdEventFilename = getKeyboardEventFileName(); 
-  File kdbEventFile = File(kbdEventFilename, "r");
-
-  auto led = ledRegistry.getLedByName(args.led);
-  
-   
-  foreach(ubyte[input_event.sizeof] buffer; kdbEventFile.byChunk(input_event.sizeof))
-  {
-    InputEvent event = InputEvent.fromRawBytes(buffer);
-    if(event.isKeyEvent())
+    if (args.listLeds)
     {
-      if(event.isKeyRelease())
-        led.state.switchOff();
-      else if(event.isKeyPress())
-        led.state.switchOn();
-
+        ledRegistry.list();
+        return 0;
     }
-    led.state.update();
-  }
 
-  return 0;
+    const string kbdEventFilename = getKeyboardEventFileName();
+    File kdbEventFile = File(kbdEventFilename, "r");
+
+    auto led = ledRegistry.getLedByName(args.led);
+
+    foreach (ubyte[input_event.sizeof] buffer; kdbEventFile.byChunk(input_event.sizeof))
+    {
+        InputEvent event = InputEvent.fromRawBytes(buffer);
+        if (event.isKeyEvent())
+        {
+            if (event.isKeyRelease())
+                led.state.switchOff();
+            else if (event.isKeyPress())
+                led.state.switchOn();
+
+        }
+        led.state.update();
+    }
+
+    return 0;
 }
-

@@ -1,33 +1,30 @@
 import std.getopt;
-import core.stdc.stdlib: exit;
+import core.stdc.stdlib : exit;
 
 struct Args
 {
-  string led;
-  bool listLeds;
+    string led;
+    bool listLeds;
 }
 
 Args parseArgv(string[] argv)
 {
-  bool needHelp = false;
+    bool needHelp = false;
 
-  if(argv.length == 1)
-    needHelp = true;
+    if (argv.length == 1)
+        needHelp = true;
 
-  Args args;
-  auto opt = getopt(argv, 
-      "led|l", "name of led", &args.led,
-      "list-leds", "list availabl leds", &args.listLeds);
+    Args args;
+    auto opt = getopt(argv, "led|l", "name of led", &args.led, "list-leds",
+            "list availabl leds", &args.listLeds);
 
-  needHelp = needHelp || opt.helpWanted;
+    needHelp = needHelp || opt.helpWanted;
 
-  if(needHelp)
-  {
-    defaultGetoptPrinter("thinkled usage:", opt.options);
-    exit(0);
-  }
+    if (needHelp)
+    {
+        defaultGetoptPrinter("thinkled usage:", opt.options);
+        exit(0);
+    }
 
-  return args;
+    return args;
 }
-
-

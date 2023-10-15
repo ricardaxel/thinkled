@@ -11,28 +11,26 @@ enum DEVICES_FILENAME = "/proc/bus/input/devices";
 string getKeyboardEventFileName()
 {
 
-  const string content = readText(DEVICES_FILENAME);
-  const string[] devices = content.split("\n\n");
-  
+    const string content = readText(DEVICES_FILENAME);
+    const string[] devices = content.split("\n\n");
 
-  string keyboardDevice;
-  foreach(device; devices)
-  {
-    if(device.canFind("keyboard"))
+    string keyboardDevice;
+    foreach (device; devices)
     {
-      keyboardDevice = device;
-      break;
+        if (device.canFind("keyboard"))
+        {
+            keyboardDevice = device;
+            break;
+        }
     }
-  }
 
-  string event;
-  foreach(line; keyboardDevice.split("\n"))
-  {
-    if(line[0] == 'H') // handler
-      event = line.strip.split(" ")[$ - 1];
-  }
+    string event;
+    foreach (line; keyboardDevice.split("\n"))
+    {
+        if (line[0] == 'H') // handler
+            event = line.strip.split(" ")[$ - 1];
+    }
 
-
-  assert(event[0 .. 5] == "event");
-  return "/dev/input/" ~ event;
+    assert(event[0 .. 5] == "event");
+    return "/dev/input/" ~ event;
 }
