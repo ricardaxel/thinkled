@@ -2,8 +2,13 @@ import core.thread;
 
 import action;
 
-shared class Timer : ActionOnLed
+shared class Timer : LedCallback
 {
+    override string getName()
+    {
+        return "timer";
+    }
+
     override void action()
     {
         while (1)

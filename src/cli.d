@@ -5,6 +5,7 @@ struct Args
 {
     string led;
     bool listLeds;
+    string[] callbacks;
 }
 
 Args parseArgv(string[] argv)
@@ -16,7 +17,7 @@ Args parseArgv(string[] argv)
 
     Args args;
     auto opt = getopt(argv, "led|l", "name of led", &args.led, "list-leds",
-            "list availabl leds", &args.listLeds);
+            "list availabl leds", &args.listLeds, "callback", &args.callbacks);
 
     needHelp = needHelp || opt.helpWanted;
 
@@ -25,6 +26,9 @@ Args parseArgv(string[] argv)
         defaultGetoptPrinter("thinkled usage:", opt.options);
         exit(0);
     }
+
+    if (!args.callbacks.length)
+        args.callbacks = ["keyboard"];
 
     return args;
 }

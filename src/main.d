@@ -1,3 +1,4 @@
+import action;
 import cli;
 import keyboard;
 import timer;
@@ -20,9 +21,15 @@ int main(string[] argv)
 
     Led led = ledRegistry.getLedByName(args.led);
 
-    auto k = new Timer();
-
-    spawn(&k.action);
+    auto allCallbacks = getAllCallbacks();
+    foreach (callback; args.callbacks)
+    {
+        foreach (c; allCallbacks)
+        {
+            if (c.getName() == callback)
+                spawn(&c.action);
+        }
+    }
 
     while (1)
     {

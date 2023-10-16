@@ -9,8 +9,11 @@ import action;
 import input_event_d;
 import input;
 
-shared class Keyboard : ActionOnLed
+shared class Keyboard : LedCallback 
 {
+    override string getName() {
+        return "keyboard";
+    }
 
     override void action()
     {
