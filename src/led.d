@@ -150,3 +150,9 @@ private:
     File ledFile;
     const string ledFileName;
 }
+
+enum LED_UPDATE
+{
+    SWITCH_ON,
+    SWITCH_OFF,
+}

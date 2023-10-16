@@ -5,6 +5,7 @@ import keyboard;
 import led;
 
 import std.stdio;
+import std.concurrency;
 
 int main(string[] argv)
 {
@@ -18,24 +19,44 @@ int main(string[] argv)
         return 0;
     }
 
+    Led led = ledRegistry.getLedByName(args.led);
+
+    spawn(&catchKbdEvent);
+
+    while (1)
+    {
+        auto update = receiveOnly!(LED_UPDATE);
+        final switch (update) with (LED_UPDATE)
+        {
+        case SWITCH_ON:
+            led.state.switchOff();
+            break;
+        case SWITCH_OFF:
+            led.state.switchOn();
+            break;
+        }
+
+        led.state.update();
+    }
+}
+
+void catchKbdEvent()
+{
     const string kbdEventFilename = getKeyboardEventFileName();
     File kdbEventFile = File(kbdEventFilename, "r");
-
-    auto led = ledRegistry.getLedByName(args.led);
 
     foreach (ubyte[input_event.sizeof] buffer; kdbEventFile.byChunk(input_event.sizeof))
     {
         InputEvent event = InputEvent.fromRawBytes(buffer);
         if (event.isKeyEvent())
         {
-            if (event.isKeyRelease())
-                led.state.switchOff();
-            else if (event.isKeyPress())
-                led.state.switchOn();
-
+            synchronized
+            {
+                if (event.isKeyRelease())
+                    send(ownerTid, LED_UPDATE.SWITCH_ON);
+                else if (event.isKeyPress())
+                    send(ownerTid, LED_UPDATE.SWITCH_OFF);
+            }
         }
-        led.state.update();
     }
-
-    return 0;
 }
