@@ -155,4 +155,5 @@ enum LED_UPDATE
 {
     SWITCH_ON,
     SWITCH_OFF,
+    TOGGLE,
 }

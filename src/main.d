@@ -1,7 +1,6 @@
 import cli;
-import input;
-import input_event_d;
 import keyboard;
+import timer;
 import led;
 
 import std.stdio;
@@ -21,7 +20,9 @@ int main(string[] argv)
 
     Led led = ledRegistry.getLedByName(args.led);
 
-    spawn(&catchKbdEvent);
+    auto k = new Timer();
+
+    spawn(&k.action);
 
     while (1)
     {
@@ -34,29 +35,11 @@ int main(string[] argv)
         case SWITCH_OFF:
             led.state.switchOn();
             break;
+        case TOGGLE:
+            led.state.toggle();
+            break;
         }
 
         led.state.update();
-    }
-}
-
-void catchKbdEvent()
-{
-    const string kbdEventFilename = getKeyboardEventFileName();
-    File kdbEventFile = File(kbdEventFilename, "r");
-
-    foreach (ubyte[input_event.sizeof] buffer; kdbEventFile.byChunk(input_event.sizeof))
-    {
-        InputEvent event = InputEvent.fromRawBytes(buffer);
-        if (event.isKeyEvent())
-        {
-            synchronized
-            {
-                if (event.isKeyRelease())
-                    send(ownerTid, LED_UPDATE.SWITCH_ON);
-                else if (event.isKeyPress())
-                    send(ownerTid, LED_UPDATE.SWITCH_OFF);
-            }
-        }
     }
 }
