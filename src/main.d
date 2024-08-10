@@ -37,10 +37,11 @@ int main(string[] argv)
         final switch (update) with (LED_UPDATE)
         {
         case SWITCH_ON:
-            led.state.switchOff();
+            //led.state.switchOff();
+            led.state.switchOn();
             break;
         case SWITCH_OFF:
-            led.state.switchOn();
+            led.state.switchOff();
             break;
         case TOGGLE:
             led.state.toggle();
